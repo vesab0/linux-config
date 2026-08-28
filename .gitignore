@@ -1,0 +1,158 @@
+*
+!.gitignore
+!.gitmodules
+
+!*/
+
+# -----------------------------
+# ALLOWED CONFIGS (MAIN STUFF)
+# -----------------------------
+
+!hypr/
+!hypr/**
+
+!waybar/
+!waybar/**
+
+!rofi/
+!rofi/**
+
+!wofi/
+!wofi/**
+
+!eww/
+!eww/**
+
+!quickshell/
+!quickshell/**
+
+!nvim/
+!nvim/**
+
+!vim/
+!vim/**
+
+!alacritty/
+!alacritty/**
+
+!kitty/
+!kitty/**
+
+!foot/
+!foot/**
+
+!dunst/
+!dunst/**
+
+!swaync/
+!swaync/**
+
+!sway/
+!sway/**
+
+!gtk-3.0/
+!gtk-3.0/**
+
+!gtk-4.0/
+!gtk-4.0/**
+
+!qt5ct/
+!qt5ct/**
+
+!qt6ct/
+!qt6ct/**
+
+!picom/
+!picom/**
+
+!mpv/
+!mpv/**
+
+!fish/
+!fish/**
+
+!zsh/
+!zsh/**
+
+!bash/
+!bash/**
+
+!starship/
+!starship/**
+
+!pipewire/
+!pipewire/**
+
+!wireplumber/
+!wireplumber/**
+
+!xsettingsd/
+!xsettingsd/**
+
+!mimeapps.list
+!user-dirs.dirs
+!starship.toml
+
+# -----------------------------
+# DOTFILES ROOT ALLOWLIST
+# -----------------------------
+
+!.zshrc
+!.bashrc
+!.profile
+!.xinitrc
+!.xprofile
+!.gitconfig
+
+# -----------------------------
+# GLOBAL IGNORES (JUNK)
+# -----------------------------
+
+# app-managed state, not hand-authored config
+/DankMaterialShell/
+
+# caches
+cache/
+Cache/
+**/cache/
+**/Cache/
+
+# runtime state
+state/
+State/
+session/
+sessions/
+tmp/
+temp/
+
+# logs
+*.log
+
+# databases / locks
+*.db
+*.sqlite
+*.lock
+*.pid
+*.sock
+
+# editor junk
+*.swp
+*.swo
+*~
+*.bak
+*backup*
+
+# secrets / keys
+*.key
+*.pem
+*.crt
+*.token
+*secret*
+*password*
+*credentials*
+
+# thumbnails / previews
+Thumbs.db
+
+# misc system noise
+.recently-used.xbel

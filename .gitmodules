@@ -1,0 +1,3 @@
+[submodule "eww/music-widget"]
+	path = eww/music-widget
+	url = https://github.com/abod8639/eww-music-widget.git

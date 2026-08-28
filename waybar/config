@@ -1,0 +1,69 @@
+{
+  "layer": "top",
+  "position": "top",
+  "reload_style_on_change": true,
+  "modules-left": ["custom/notification", "clock", "custom/pacman"],
+  "modules-center": ["hyprland/workspaces"],
+  "modules-right": ["group/expand","custom/music", "pulseaudio", "custom/brightness", "custom/power", "custom/calendar"],
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "active": "",
+      "default": "",
+      "empty": ""
+    },
+    "persistent-workspaces": {
+      "*": [1, 2, 3, 4, 5, 6, 7, 8]
+    }
+  },
+
+  "custom/notification": {
+    "tooltip": false,
+    "format": "",
+    "on-click": "swaync-client -t -sw",
+    "escape": true
+  },
+
+  "clock": {
+    "format": " {:%I:%M:%S %p} ",
+    "interval": 1,
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "format": {
+        "today": "<span color='#fAfBfC'><b>{}</b></span>"
+      }
+    }
+  },
+
+
+  "pulseaudio": {
+    "format": "󰕾",
+    "tooltip": false,
+        "on-click": "~/.config/eww/scripts/toggle_mixer.sh",
+        "on-click-right": "eww close volume-mixer",
+        "interval": "once"
+  },
+
+  "custom/music": {
+  "format": "󰋋",
+  "on-click": "~/.config/eww/scripts/toggle_music.sh"
+},
+
+"custom/calendar": {
+  "exec": "date '+%d %b %Y'",
+  "interval": 60,
+  "format": "{}",
+  "on-click": "~/.config/eww/scripts/toggle_calendar.sh"
+},
+
+"custom/power": {
+  "format": "⏻",
+  "on-click": "~/.config/eww/scripts/toggle_power.sh"
+},
+
+"custom/brightness": {
+  "format": "󰃠",
+  "on-click": "~/.config/eww/scripts/toggle_brightness.sh"
+}
+}

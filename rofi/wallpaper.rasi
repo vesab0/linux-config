@@ -1,0 +1,64 @@
+* {
+    background-color: #0b0b10;
+    text-color: #e6e6e6;
+
+    selected-normal-background: #1f1f2a;
+    selected-normal-foreground: #ffffff;
+
+    normal-background: #0b0b10;
+    normal-foreground: #cfcfd6;
+
+    urgent-background: #2a0f14;
+    urgent-foreground: #ffffff;
+
+    alternate-normal-background: #0b0b10;
+    alternate-normal-foreground: #cfcfd6;
+}
+
+window {
+    background-color: #0b0b10;
+    border: 0;
+    padding: 14px;
+}
+
+mainbox {
+    background-color: #0b0b10;
+    spacing: 0;
+}
+
+listview {
+    background-color: #0b0b10;
+    columns: 5;
+    lines: 2;
+    spacing: 14px;
+    fixed-height: false;
+}
+
+element {
+    background-color: #0b0b10;
+    padding: 0px;
+    border: 0;
+}
+
+element-icon {
+    size: 280px;
+    background-color: #0b0b10;
+}
+
+element-text {
+    enabled: false;
+}
+
+element selected {
+    background-color: #131313;
+    
+}
+
+inputbar {
+    enabled: false;
+    background-color: #0b0b10;
+}
+
+entry {
+    enabled: false;
+}

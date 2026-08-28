@@ -1,0 +1,37 @@
+{
+  "workspaces": [
+    {
+      "name": "Default",
+      "monitors": {
+        "desc:ASUSTek COMPUTER INC ASUS VG249 0x00004ED4": {
+          "resolution": "1920x1080",
+          "refresh_rate": 60.0,
+          "scale": 1.0,
+          "rotation": 0,
+          "position_x": 1920,
+          "position_y": 0,
+          "is_primary": false
+        },
+        "desc:Hisense Electric Co. Ltd. HISENSE 0x00000001": {
+          "resolution": "1920x1080",
+          "refresh_rate": 30.0,
+          "scale": 1.0,
+          "rotation": 0,
+          "position_x": 0,
+          "position_y": 0,
+          "is_primary": false
+        },
+        "desc:ASUSTek COMPUTER INC ASUS VG249 0x00004ECF": {
+          "resolution": "1920x1080",
+          "refresh_rate": 60.0,
+          "scale": 1.0,
+          "rotation": 0,
+          "position_x": 3840,
+          "position_y": 0,
+          "is_primary": true
+        }
+      }
+    }
+  ],
+  "active_workspace": 0
+}

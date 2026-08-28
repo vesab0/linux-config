@@ -1,0 +1,339 @@
+@import "wal-colors";
+
+* {
+  font-family: "CodeNewRoman Nerd Font Propo", "Noto Sans", sans-serif;
+  font-size: 14px;
+}
+
+window {
+  background: transparent;
+}
+
+.mixer-root {
+  background: $background;
+    
+  padding: 14px 16px 16px 16px;
+  border: 1px solid mix($background, $foreground, 85%);
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.8);
+  min-width: 320px;
+}
+
+.mixer-header {
+  margin-bottom: 12px;
+}
+
+.mixer-title {
+  color: $foreground;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.close-btn {
+  all: unset;
+  color: $color8;
+  font-size: 16px;
+  padding: 2px 4px;
+    
+}
+
+.close-btn:hover {
+  color: $foreground;
+  background: mix($background, $foreground, 80%);
+}
+
+.section-label-box {
+  margin-bottom: 6px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.14em;
+  color: $color8;
+}
+
+.divider {
+  background: mix($background, $foreground, 88%);
+  margin: 10px 0 12px 0;
+}
+
+
+
+.app-row {
+  background: mix($background, $foreground, 93%);
+    
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border: 1px solid mix($background, $foreground, 86%);
+}
+
+.app-row:hover {
+  background: mix($background, $foreground, 88%);
+}
+
+.master-row {
+  background: mix($background, $foreground, 91%);
+    
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border: 1px solid mix($background, $foreground, 84%);
+}
+
+.master-row:hover {
+  background: mix($background, $foreground, 86%);
+}
+
+.app-icon {
+  font-size: 18px;
+  color: $color6;
+  min-width: 26px;
+}
+
+.app-name {
+  color: $foreground;
+  font-size: 13px;
+}
+
+.master-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $foreground;
+}
+
+.app-vol-label {
+  color: $color8;
+  font-size: 12px;
+  min-width: 36px;
+  margin-left: 6px;
+}
+
+scale trough {
+  background: mix($background, $foreground, 85%);
+    
+}
+
+scale highlight {
+  background: $color6;
+    
+}
+
+scale slider {
+  background: $foreground;
+    
+  min-width: 13px;
+}
+
+scale slider:hover {
+  background: $color6;
+}
+
+.muted trough {
+  background: mix($background, $foreground, 92%);
+}
+
+.muted highlight {
+  background: $color1;
+}
+
+.muted slider {
+  background: $color8;
+}
+
+.mute-btn {
+  all: unset;
+  font-size: 18px;
+  color: $color6;
+  min-width: 26px;
+    
+  padding: 2px;
+}
+
+.mute-btn:hover {
+  color: $foreground;
+}
+
+.calendar-box {
+  background: $background;
+  color: $foreground;
+    
+  padding: 10px;
+  border: 1px solid mix($background, $foreground, 85%);
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+calendar {
+  background: transparent;
+  color: $foreground;
+}
+
+calendar:selected {
+  background: $color6;
+  color: $background;
+    
+}
+
+calendar:indeterminate {
+  color: $color8;
+}
+
+.power-box {
+  background: $background;
+  padding: 10px;
+  border: 1px solid mix($background, $foreground, 85%);
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.8);
+}
+
+.power-btn {
+  all: unset;
+  background: mix($background, $foreground, 92%);
+  color: $foreground;
+  padding: 3px;
+  margin-bottom: 6px;
+}
+
+.power-btn:hover {
+  background: mix($background, $foreground, 85%);
+}
+
+.power-btn.danger {
+  background: $color1;
+  color: $foreground;
+}
+
+.power-btn.danger:hover {
+  background: $color9;
+}
+
+.music-widget {
+  background-color: $background;
+  padding: 10px;
+  color: $foreground;
+  font-family: "CodeNewRoman Nerd Font Propo", "Noto Sans", sans-serif;
+  border: 0.5px solid mix($background, $foreground, 85%);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+.cover-art {
+  background-size: cover;
+  background-position: center;
+  min-width: 155px;
+  min-height: 125px;
+  margin: 5px 5px 5px 0;
+  padding-right: 20px;
+  padding-bottom: 50px;
+  border: 1px solid mix($background, $foreground, 80%);
+}
+
+.music-info {
+  padding: 20px 20px;
+}
+
+.song-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: $foreground;
+  margin-bottom: 5px;
+}
+
+.artist {
+  font-size: 14px;
+  opacity: 0.7;
+  color: $color8;
+  margin-bottom: 5px;
+}
+
+.controls {
+  margin: 8px 0;
+  font-size: 22px;
+}
+
+.controls button {
+  background: none;
+  border: none;
+  color: $color6;
+  padding: 0 10px;
+  transition: all 0.2s ease-in-out;
+}
+
+.controls button:hover {
+  color: $foreground;
+}
+
+.position {
+  font-size: 12px;
+  opacity: 0.75;
+  color: $color8;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  margin-left: 5px;
+  padding: 0;
+  border: none;
+}
+
+.progress-bar trough {
+  background-color: mix($background, $foreground, 90%);
+  min-height: 12px;
+  min-width: 180px;
+  border: 1px solid mix($background, $foreground, 80%);
+}
+
+.progress-bar highlight {
+  background: $color6;
+}
+.cava-visualizer {
+  margin-left: 5px;
+  font-family: "monospace";
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: $color6;
+  margin-top: 10px;
+}
+
+.brightness-box {
+  background: mix($background, $foreground, 94%);
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid mix($background, $foreground, 86%);
+}
+
+.brightness-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $foreground;
+  margin-bottom: 6px;
+}
+
+.brightness-value {
+  font-size: 12px;
+  color: $color8;
+  margin-left: 6px;
+}
+
+.brightness-box scale trough {
+  background: mix($background, $foreground, 88%);
+  border-radius: 999px;
+  min-height: 6px;
+}
+
+.brightness-box scale highlight {
+  background: $color3;
+  border-radius: 999px;
+}
+
+.brightness-box scale slider {
+  background: $foreground;
+  min-width: 12px;
+  min-height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px mix($color3, $foreground, 50%);
+}
+
+.brightness-box scale slider:hover {
+  background: $color3;
+}
+
+.brightness-box:hover {
+  background: mix($background, $foreground, 92%);
+}

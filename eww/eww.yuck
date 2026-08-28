@@ -1,0 +1,255 @@
+(defpoll sink_volume :interval "1s"
+  :initial "[]"
+  `~/.config/eww/scripts/get_volumes.sh`)
+
+
+(defwidget app_slider [name vol icon muted sink_id]
+  (box :class "app-row"
+       :orientation "horizontal"
+       :space-evenly false
+       :spacing 10
+       :hexpand true
+       :vexpand false
+    (label :class "app-icon" :text icon :xalign 0.5)
+    (box :orientation "vertical"
+         :space-evenly false
+         :spacing 2
+         :hexpand true
+         :vexpand false
+      (box :orientation "horizontal"
+           :space-evenly false
+        (label :class "app-name" :text name :xalign 0 :hexpand true)
+        (label :class "app-vol-label" :text "${vol}%"))
+      (scale :class {muted == "true" ? "slider muted" : "slider"}
+             :min 0 :max 101 :value vol
+             :hexpand true
+             :vexpand false
+             :onchange "~/.config/eww/scripts/set_volume.sh sink-input ${sink_id} {}"))))
+
+
+(defwidget master_slider [vol muted]
+  (box :class "app-row master-row"
+       :orientation "horizontal"
+       :space-evenly false
+       :spacing 10
+       :hexpand true
+       :vexpand false
+    (button :class "mute-btn"
+            :onclick "~/.config/eww/scripts/toggle_mute.sh sink"
+            (label :text {muted == "true" ? "󰖁" : "󰕾"}))
+    (box :orientation "vertical"
+         :space-evenly false
+         :spacing 2
+         :hexpand true
+         :vexpand false
+      (box :orientation "horizontal"
+           :space-evenly false
+        (label :class "app-name master-label" :text "Master Output" :xalign 0 :hexpand true)
+        (label :class "app-vol-label" :text "${vol}%"))
+      (scale :class {muted == "true" ? "slider muted" : "slider"}
+             :min 0 :max 101 :value vol
+             :hexpand true
+             :vexpand false
+             :onchange "~/.config/eww/scripts/set_volume.sh sink-master {}"))))
+
+
+(defwidget volume_mixer []
+  (box :class "mixer-root"
+       :orientation "vertical"
+       :space-evenly false
+       :spacing 6
+       :hexpand true
+       :vexpand true
+
+    ;; header
+    (box :class "mixer-header"
+         :orientation "horizontal"
+         :space-evenly false
+      (label :class "mixer-title" :text "󰕾  Volume Mixer" :hexpand true :xalign 0)
+      (button :class "close-btn"
+              :onclick "eww close volume-mixer"
+              (label :text "󰅖")))
+
+    ;; master
+    (box :class "section-label-box"
+      (label :class "section-label" :text "OUTPUT" :xalign 0))
+
+    (master_slider :vol {sink_volume != "[]" ? sink_volume.master_vol : 0}
+                   :muted {sink_volume != "[]" ? sink_volume.master_muted : "false"})
+
+    ;; divider
+    (box :class "divider")
+
+    ;; apps (NO SCROLL)
+    (box :class "apps-root"
+         :orientation "vertical"
+         :space-evenly false
+         :spacing 6
+         :hexpand true
+         :vexpand true
+      (box :class "section-label-box"
+        (label :class "section-label" :text "APPLICATIONS" :xalign 0))
+
+      (for app in {sink_volume != "[]" ? sink_volume.apps : []}
+        (app_slider :name {app.name}
+                    :vol  {app.vol}
+                    :icon {app.icon}
+                    :muted {app.muted}
+                    :sink_id {app.id}))))
+)
+
+;; --- Listeners & Polls ---
+;; Use `deflisten` with `playerctl --follow` to react to player events
+;; efficiently. When a player quits, `playerctl` exits, and the `|| echo`
+;; part provides a default value, ensuring the UI updates correctly.
+(deflisten song_title    :initial "No Music Playing"
+"playerctl metadata --format '{{title}}' --follow || echo 'No Music Playing'")
+
+(deflisten song_artist   :initial "Unknown Artist"
+"playerctl metadata --format '{{artist}}' --follow || echo 'Unknown Artist'")
+
+(deflisten player_status :initial "Stopped"
+"playerctl metadata --format '{{status}}' --follow || echo 'Stopped'")
+
+;; Polling is still needed for things that change continuously, like position,
+;; but we can use longer, more efficient intervals.
+(defpoll song_length_s   :interval "2s"
+"playerctl metadata mpris:length | awk '{print $1 / 1000000}' || echo 1")
+
+(defpoll song_position_s    :interval "1s" "playerctl position || echo 0")
+
+(defpoll formatted_position :interval "1s" "playerctl position -f '{{duration(position)}}' || echo '0:00'")
+
+;; Cover art and volume can also be polled at a slower rate.
+(defpoll cover_art_path :interval "1s" "$HOME/.config/eww/scripts/get-cover.sh")
+(defpoll volume_percent :interval "2s" "$HOME/.config/eww/scripts/volumecontroller.sh get")
+(defpoll volume_mute    :interval "2s" "pamixer --get-mute")
+
+;; Cava runs as a persistent listener, which is correct.
+(deflisten cava :initial "" "bash $HOME/.config/eww/scripts/cava.sh")
+
+
+;; --- Widget Definition ---
+
+(defwidget music-widget []
+  (box :class "music-widget" :orientation "h" :space-evenly false
+    (box :class "cover-art" :style "background-image: url('${cover_art_path}');")
+    (box :class "music-info" :orientation "v" :space-evenly false
+      (label :class "song-title" :text song_title :limit-width 25)
+      (label :class "artist" :text song_artist :limit-width 25)
+      
+      (box :class "controls" :orientation "h"
+        (button :onclick "playerctl previous" "󰒮")
+        (button :onclick "playerctl play-pause" {player_status == "Playing" ? "󰏤" : "󰐊"})
+        (button :onclick "playerctl next" "󰒭")
+      )
+      
+      (label :class "position" :text formatted_position)
+
+      (
+        scale :class "progress-bar" 
+              :min 0 
+              :max song_length_s 
+              :value song_position_s 
+              :onchange "playerctl position {} >/dev/null 2>&1"
+      )
+
+      (label :class "cava-visualizer" :text cava)
+
+    )
+    
+  )
+)
+
+
+
+(defwindow volume-mixer
+  :monitor 0
+  :geometry (geometry :x "0px"
+                      :y "10px"
+                      :width "340px"
+                      :height "0px"
+                      :anchor "top right")
+  :stacking "fg"
+  :focusable true
+  (volume_mixer))
+
+(defwidget calendar_widget []
+  (box :class "calendar-box"
+    (calendar)
+  )
+)
+
+(defwindow calendar-popup
+  :geometry (geometry :width "260px" :height "260px" :anchor "top right")
+  :stacking "fg"
+  :focusable true
+  (calendar_widget)
+)
+
+(defwidget power_widget []
+  (box :class "power-box" :orientation "v" :spacing 10
+    (button :class "power-btn"
+      :onclick "systemctl reboot"
+      "Reboot")
+    (button :class "power-btn danger"
+      :onclick "systemctl poweroff"
+      "Shutdown")
+  )
+)
+
+(defwindow power-popup
+  :geometry (geometry :width "200px" :height "60px" :anchor "top right")
+  :stacking "fg"
+  :focusable true
+  (power_widget)
+)
+
+(defwindow music-widget
+  :geometry (
+    geometry :x "5px" 
+             :y "5px" 
+             :width "440px" 
+             :height "120px"
+             :anchor "top right"
+  )
+  :stacking "fg"
+  :focusable true
+  :wm-ignore true
+  (music-widget)
+)
+
+(defpoll b_left :interval "5s" "ddcutil getvcp 10 --display 1 | awk '{for(i=1;i<=NF;i++) if ($i==\"current\") print $(i+3)}' | tr -d ','")
+
+(defpoll b_right :interval "5s" "ddcutil getvcp 10 --display 2 | awk '{for(i=1;i<=NF;i++) if ($i==\"current\") print $(i+3)}' | tr -d ','")
+(defwindow brightness-widget
+  :geometry (geometry :anchor "top right" :width "260px" :height "140px")
+  :stacking "fg"
+  :focusable true
+
+  (box :class "brightness-box" :orientation "vertical" :spacing 8
+
+    (label :class "brightness-label" :text "Brightness")
+
+    (scale
+      :min 0
+      :max 100
+      :value b_left
+      :onchange "bash ~/.config/eww/scripts/brightness_live.sh left {}")
+
+    (scale
+      :min 0
+      :max 100
+      :value b_right
+      :onchange "bash ~/.config/eww/scripts/brightness_live.sh right {}")
+  )
+)
+
+(defwindow clickaway
+  :monitor 0
+  :geometry (geometry :x "0%" :y "30%" :width "200%" :height "95%")
+  :stacking "fg"
+  :focusable true
+  (eventbox
+    :onclick "eww close power-popup; eww close brightness-widget; eww close calendar-popup; eww close volume-mixer; eww close music-widget; eww close clickaway"
+    (box)))
