@@ -25,3 +25,12 @@ Then run `./install.sh`. It installs paru and the package lists, oh-my-zsh, link
 `home/.zshrc` and `home/.bashrc` into `$HOME`, copies the dms-shell overrides into
 `/usr/share/quickshell/dms/`, enables the services, and offers to swap sddm for
 greetd.
+
+Check it worked with `./verify.sh` — read-only, reports ok/FAIL/warn for the
+packages, binaries, dms-shell overrides, services, shell links, greetd config,
+theming and display setup. Exits non-zero if anything failed.
+
+On a machine with different displays, `hypr/dms/outputs.lua`,
+`hypr/hyprland.lua` (workspaces 1-5 are pinned to `DP-2`, 6-10 to `DP-3`) and
+`hypr/dms/binds-user.lua` all hard-code this desktop's three monitors and need
+editing. `verify.sh` warns when they still do.
