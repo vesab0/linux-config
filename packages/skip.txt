@@ -1,0 +1,16 @@
+# Packages install.sh will NOT install — tied to the desktop's hardware.
+# Install by hand if they apply to the new machine.
+
+# NVIDIA GPU
+nvidia-open-dkms
+nvidia-settings
+nvidia-utils
+
+# GPU fan/clock control (desktop dGPU)
+lact
+
+# Intel CPU microcode — use amd-ucode on an AMD machine
+intel-ucode
+
+# SteelSeries / gaming mouse configuration
+piper

@@ -89,6 +89,23 @@
 !xsettingsd/
 !xsettingsd/**
 
+# DankMaterialShell: only the hand-tuned settings, not the app state.
+# plugins/ are separate upstream git repos — see README, not tracked here.
+!DankMaterialShell/settings.json
+DankMaterialShell/plugins/
+
+# reproduction assets (see README)
+!packages/
+!packages/**
+
+!home/
+!home/**
+
+!system/
+!system/**
+
+!install.sh
+
 !mimeapps.list
 !user-dirs.dirs
 !starship.toml
@@ -107,9 +124,6 @@
 # -----------------------------
 # GLOBAL IGNORES (JUNK)
 # -----------------------------
-
-# app-managed state, not hand-authored config
-/DankMaterialShell/
 
 # caches
 cache/
