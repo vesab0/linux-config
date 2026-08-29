@@ -77,6 +77,31 @@ drop_unavailable() {
 	mapfile -t pkgs < <(printf '%s\n' "${pkgs[@]}" | grep -xFf <(printf '%s\n' "$gone") -v || true)
 }
 
+# paru also aborts on one unknown target, and AUR names get renamed or removed.
+# A package is fine if the AUR knows it or it has since moved into a repo.
+drop_unavailable_aur() {
+	local -n pkgs="$1"
+	local query resp known gone
+	command -v curl >/dev/null || return
+
+	query="$(printf 'arg[]=%s&' "${pkgs[@]}")"
+	if ! resp="$(curl -sf --max-time 20 "https://aur.archlinux.org/rpc/v5/info?${query%&}")"; then
+		warn "could not reach the AUR to pre-check names; continuing anyway"
+		return
+	fi
+
+	known="$(mktemp)"
+	grep -oP '"Name":"\K[^"]+' <<< "$resp" > "$known"
+	pacman -Slq >> "$known"
+	gone="$(printf '%s\n' "${pkgs[@]}" | grep -vxFf "$known" || true)"
+	rm -f "$known"
+	[[ -z "$gone" ]] && return
+
+	warn "not in the AUR or any repo — skipping:"
+	sed 's/^/          /' <<< "$gone"
+	mapfile -t pkgs < <(printf '%s\n' "${pkgs[@]}" | grep -xFf <(printf '%s\n' "$gone") -v || true)
+}
+
 install_packages() {
 	check_multilib
 
@@ -87,6 +112,7 @@ install_packages() {
 
 	log "Installing AUR packages"
 	mapfile -t aur < <(resolve_packages "$CONFIG_DIR/packages/aur.txt")
+	drop_unavailable_aur aur
 	paru -S --needed --noconfirm "${aur[@]}"
 
 	if [[ -f "$CONFIG_DIR/packages/skip.txt" ]]; then

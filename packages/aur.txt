@@ -1,22 +1,18 @@
 clock-rs-git
 dankcalendar-bin
-dankcalendar-bin-debug
 docker-desktop
 dsearch-bin
-dsearch-bin-debug
 eww
 gnome-network-displays
 greetd-dms-greeter-bin
 grimblast-git
 hyprdvd
 hyprmon
-illogical-impulse-bibata-modern-classic-bin
 light
 localsend-bin
 myfetch
 neofetch
 paru
-paru-debug
 photoview
 protonup-qt
 pyprland
@@ -33,4 +29,3 @@ vscodium-bin
 waypaper
 wlogout
 yay
-yay-debug
