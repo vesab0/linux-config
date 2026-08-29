@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Bootstrap this Hyprland + DankMaterialShell setup on a fresh Arch install.
 # Run as your normal user (not root), after checking this repo out into ~/.config.
-set -euo pipefail
+#
+# Every step is independent and idempotent: a failing step is recorded and the
+# run continues, so one bad AUR build cannot cost you the rest of the setup.
+# Re-run freely — completed work is skipped.
+set -uo pipefail
 
 CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DMS_SHARE="/usr/share/quickshell/dms"
@@ -9,6 +13,30 @@ DMS_SHARE="/usr/share/quickshell/dms"
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m warning:\033[0m %s\n' "$*" >&2; }
 die() { printf '\033[1;31m error:\033[0m %s\n' "$*" >&2; exit 1; }
+
+FAILED_STEPS=()
+FAILED_PKGS=()
+
+# Runs one step, records a failure, and carries on regardless.
+run_step() {
+	local name="$1" fn="$2"
+	if ! "$fn"; then
+		warn "step '$name' did not complete"
+		FAILED_STEPS+=("$name")
+	fi
+	return 0
+}
+
+# The AUR builds take long enough for the sudo timestamp to expire mid-run.
+keep_sudo_alive() {
+	sudo -v || return 1
+	while true; do
+		sudo -n true 2>/dev/null
+		sleep 60
+		kill -0 "$$" 2>/dev/null || exit
+	done &
+	SUDO_KEEPALIVE=$!
+}
 
 confirm() {
 	local reply
@@ -102,18 +130,42 @@ drop_unavailable_aur() {
 	mapfile -t pkgs < <(printf '%s\n' "${pkgs[@]}" | grep -xFf <(printf '%s\n' "$gone") -v || true)
 }
 
+# paru stops at the first package that will not build. Try the batch, then fall
+# back to one at a time so a single broken PKGBUILD costs only that package.
+install_aur_batch() {
+	local pkgs=("$@") p
+	if paru -S --needed --noconfirm "${pkgs[@]}"; then
+		return 0
+	fi
+
+	warn "batch build failed — retrying individually to isolate the culprit"
+	for p in "${pkgs[@]}"; do
+		if pacman -Qq "$p" &>/dev/null; then
+			continue
+		fi
+		if ! paru -S --needed --noconfirm "$p"; then
+			warn "could not build: $p"
+			FAILED_PKGS+=("$p")
+		fi
+	done
+	((${#FAILED_PKGS[@]} == 0))
+}
+
 install_packages() {
 	check_multilib
 
 	log "Installing official repo packages"
 	mapfile -t native < <(resolve_packages "$CONFIG_DIR/packages/pacman.txt")
 	drop_unavailable native
-	sudo pacman -S --needed --noconfirm "${native[@]}"
+	if ! sudo pacman -S --needed --noconfirm "${native[@]}"; then
+		warn "some repo packages failed to install"
+		FAILED_PKGS+=("<repo packages>")
+	fi
 
 	log "Installing AUR packages"
 	mapfile -t aur < <(resolve_packages "$CONFIG_DIR/packages/aur.txt")
 	drop_unavailable_aur aur
-	paru -S --needed --noconfirm "${aur[@]}"
+	install_aur_batch "${aur[@]}"
 
 	if [[ -f "$CONFIG_DIR/packages/skip.txt" ]]; then
 		log "Skipped (hardware-specific — install by hand if they apply):"
@@ -185,16 +237,36 @@ setup_wallpapers() {
 
 main() {
 	check_preconditions
-	install_aur_helper
-	install_packages
-	install_shell
-	apply_dms_overrides
-	enable_services
-	install_greeter
-	setup_wallpapers
+	keep_sudo_alive || die "sudo is required"
 
-	log "Done. Before rebooting, edit hypr/dms/outputs.lua and hypr/hyprland.lua"
-	log "for this machine's displays — see the 'Laptop / new machine' section of README.md."
+	run_step "AUR helper"      install_aur_helper
+	run_step "packages"        install_packages
+	run_step "shell"           install_shell
+	run_step "dms overrides"   apply_dms_overrides
+	run_step "services"        enable_services
+	run_step "login manager"   install_greeter
+	run_step "wallpapers"      setup_wallpapers
+
+	[[ -n "${SUDO_KEEPALIVE:-}" ]] && kill "$SUDO_KEEPALIVE" 2>/dev/null
+
+	printf '\n\033[1m────────────────────────── summary ──────────────────────────\033[0m\n'
+	if ((${#FAILED_STEPS[@]} == 0 && ${#FAILED_PKGS[@]} == 0)); then
+		printf '\033[1;32mEverything completed.\033[0m\n'
+	else
+		((${#FAILED_STEPS[@]})) && {
+			printf '\033[1;31mSteps that did not complete:\033[0m\n'
+			printf '    %s\n' "${FAILED_STEPS[@]}"
+		}
+		((${#FAILED_PKGS[@]})) && {
+			printf '\033[1;31mPackages that would not build:\033[0m\n'
+			printf '    %s\n' "${FAILED_PKGS[@]}"
+			printf '  These are individually optional; re-run to retry.\n'
+		}
+		printf '\nEverything else was installed. Re-running is safe.\n'
+	fi
+
+	log "Next: edit hypr/dms/outputs.lua and hypr/hyprland.lua for this machine's"
+	log "displays, then check the result with ./verify.sh"
 }
 
 main "$@"
