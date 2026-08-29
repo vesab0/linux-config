@@ -9,6 +9,12 @@ set -uo pipefail
 
 CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DMS_SHARE="/usr/share/quickshell/dms"
+PKG_TIMEOUT="20m"
+
+# Abort a clone that transfers under 1 KB/s for 60s rather than hanging on a
+# flaky connection; makepkg shells out to git for every -git package.
+export GIT_HTTP_LOW_SPEED_LIMIT=1024
+export GIT_HTTP_LOW_SPEED_TIME=60
 
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m warning:\033[0m %s\n' "$*" >&2; }
@@ -143,16 +149,42 @@ install_aur_batch() {
 		if pacman -Qq "$p" &>/dev/null; then
 			continue
 		fi
-		if ! paru -S --needed --noconfirm "$p"; then
-			warn "could not build: $p"
+		local rc=0
+		timeout --foreground "$PKG_TIMEOUT" paru -S --needed --noconfirm "$p" || rc=$?
+		if ((rc != 0)); then
+			if ((rc == 124)); then
+				warn "timed out after $PKG_TIMEOUT: $p"
+			else
+				warn "could not build: $p"
+			fi
 			FAILED_PKGS+=("$p")
 		fi
 	done
 	((${#FAILED_PKGS[@]} == 0))
 }
 
+# A missing signing key makes a build stop and ask, and the keyserver fetch can
+# hang. Import them up front, with a timeout, and never block the run on it.
+import_aur_keys() {
+	local keyfile="$CONFIG_DIR/packages/aur-keys.txt" keys
+	[[ -f "$keyfile" ]] || return 0
+	mapfile -t keys < <(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' -e 's/[[:space:]]//g' "$keyfile")
+	((${#keys[@]})) || return 0
+
+	log "Importing AUR signing keys"
+	local k
+	for k in "${keys[@]}"; do
+		if gpg --list-keys "$k" &>/dev/null; then
+			continue
+		fi
+		timeout 45 gpg --recv-keys "$k" 2>/dev/null ||
+			warn "could not fetch key $k — its package may prompt or fail"
+	done
+}
+
 install_packages() {
 	check_multilib
+	import_aur_keys
 
 	log "Installing official repo packages"
 	mapfile -t native < <(resolve_packages "$CONFIG_DIR/packages/pacman.txt")
