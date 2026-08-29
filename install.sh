@@ -46,9 +46,43 @@ resolve_packages() {
 	fi
 }
 
+# steam and the lib32-* packages live in multilib, which is off by default.
+# One unresolvable target aborts the whole pacman transaction, so check first.
+check_multilib() {
+	if pacman-conf --repo-list 2>/dev/null | grep -qx multilib; then
+		return
+	fi
+	warn "the multilib repo is disabled — steam and lib32-* will not resolve"
+	if confirm "Enable multilib in /etc/pacman.conf now?"; then
+		sudo sed -i '/^#\[multilib\]/,/^#Include/s/^#//' /etc/pacman.conf
+		sudo pacman -Sy
+	else
+		warn "add steam, lib32-gamemode and lib32-mangohud to packages/skip.txt, then re-run"
+	fi
+}
+
+# pacman aborts the entire transaction if any single target is unknown, so drop
+# packages that no longer exist in any enabled repo rather than failing outright.
+drop_unavailable() {
+	local -n pkgs="$1"
+	local avail gone
+	avail="$(mktemp)"
+	pacman -Slq > "$avail"
+	gone="$(printf '%s\n' "${pkgs[@]}" | grep -vxFf "$avail" || true)"
+	rm -f "$avail"
+	[[ -z "$gone" ]] && return
+
+	warn "not in any enabled repo — skipping:"
+	sed 's/^/          /' <<< "$gone"
+	mapfile -t pkgs < <(printf '%s\n' "${pkgs[@]}" | grep -xFf <(printf '%s\n' "$gone") -v || true)
+}
+
 install_packages() {
+	check_multilib
+
 	log "Installing official repo packages"
 	mapfile -t native < <(resolve_packages "$CONFIG_DIR/packages/pacman.txt")
+	drop_unavailable native
 	sudo pacman -S --needed --noconfirm "${native[@]}"
 
 	log "Installing AUR packages"
