@@ -14,7 +14,7 @@ hl.config({
 		-- empty inherits XKB_DEFAULT_LAYOUT (libxkbcommon), falls back to "us"
 		kb_layout = "",
 		numlock_by_default = true,
-		follow_mouse = 0,
+		follow_mouse = 1,
 		touchpad = {
 			tap_to_click = true,
 			natural_scroll = true,
@@ -52,7 +52,7 @@ hl.config({
 
 hl.animation({ leaf = "windowsIn", enabled = true, speed = 3, bezier = "default" })
 hl.animation({ leaf = "windowsOut", enabled = true, speed = 3, bezier = "default" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "default" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "default", style = "slidevert" })
 hl.animation({ leaf = "windowsMove", enabled = true, speed = 4, bezier = "default" })
 hl.animation({ leaf = "fade", enabled = true, speed = 3, bezier = "default" })
 hl.animation({ leaf = "border", enabled = true, speed = 3, bezier = "default" })
@@ -67,9 +67,9 @@ end
 
 -- === Autostart: workspace 10 gets neofetch/cmatrix/cava, workspace 1 gets vesktop/spotify ===
 hl.on("hyprland.start", function()
-	hl.exec_cmd("[workspace 10 silent] ghostty -e neofetch")
-	hl.exec_cmd("[workspace 10 silent] ghostty -e cmatrix")
-	hl.exec_cmd("[workspace 10 silent] ghostty -e cava")
+	hl.exec_cmd("[workspace 10 silent] ghostty --wait-after-command=true -e neofetch")
+	hl.exec_cmd("[workspace 10 silent] bash -c 'sleep 1; ghostty -e cmatrix'")
+	hl.exec_cmd("[workspace 10 silent] bash -c 'sleep 2; ghostty -e cava'")
 	hl.exec_cmd("[workspace 1 silent] vesktop")
 	hl.exec_cmd("[workspace 1 silent] spotify")
 end)
